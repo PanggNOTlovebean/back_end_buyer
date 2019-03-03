@@ -1,11 +1,15 @@
 package com.example.buyer.controller;
 
 import com.example.buyer.object.Order;
+import com.example.buyer.object.OrderDetailPayed;
+import com.example.buyer.object.OrderPaid;
 import com.example.buyer.objectVO.BuyerIdVO;
 import com.example.buyer.objectVO.IdVO;
 import com.example.buyer.result.Result;
 import com.example.buyer.result.ResultCode;
 import com.example.buyer.result.ResultFactory;
+import com.example.buyer.service.OrderDetailPayedService;
+import com.example.buyer.service.OrderPaidService;
 import com.example.buyer.service.impl.OrderServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,17 +17,21 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.sql.Date;
 import java.util.List;
 
 @RestController
 public class OrderController {
     @Autowired
     OrderServiceImpl orderService;
+    @Autowired
+    OrderDetailPayedService orderDetailPayedService;
+    @Autowired
+    OrderPaidService orderPaidService;
     @CrossOrigin
     @PostMapping("/create")
     @ResponseBody
     public Result chooseFood(@Valid @RequestBody Order order, BindingResult bindingResult){
-        System.out.println(order);
         if(bindingResult.hasErrors()){
                 return ResultFactory.buildFailResult("失败");
         }
@@ -39,7 +47,6 @@ public class OrderController {
     @ResponseBody
     public Result cancel(@Valid @RequestBody IdVO id){
         try{
-            System.out.println(id.getId());
             orderService.deleteById(id.getId());
         }catch (Exception e){
             return ResultFactory.buildFailResult("失败");
@@ -50,9 +57,27 @@ public class OrderController {
     @PostMapping("/clear")
     @ResponseBody
     public Result clear(@Valid @RequestBody BuyerIdVO buyerId){
-        System.out.println(buyerId);
         try{
+            List<Order> orderList;
+            orderList=orderService.findByBuyerId(Integer.parseInt(buyerId.getBuyerId()));
             orderService.deleteByBuyerId(buyerId.getBuyerId());
+            Integer allprice=0;
+            for(int i=0;i<orderList.size();i++){
+                OrderDetailPayed orderDetailPayed=new OrderDetailPayed();
+                orderDetailPayed.setName(orderList.get(i).getName());
+                orderDetailPayed.setPrice(orderList.get(i).getPrice());
+                orderDetailPayed.setDate(new Date(System.currentTimeMillis()));
+                orderDetailPayed.setId(orderList.get(i).getId());
+                orderDetailPayedService.save(orderDetailPayed);
+                allprice+=orderList.get(i).getPrice();
+
+            }
+            OrderPaid orderPaid=new OrderPaid();
+            orderPaid.setPrice(allprice);
+            orderPaid.setId(String.valueOf(System.currentTimeMillis()));
+            orderPaid.setDate(new Date(System.currentTimeMillis()));
+
+            orderPaidService.save(orderPaid);
         }catch (Exception e){
             return ResultFactory.buildFailResult("失败");
         }
