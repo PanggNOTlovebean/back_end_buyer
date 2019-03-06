@@ -3,11 +3,13 @@ package com.example.buyer.object;
 import lombok.Data;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 @Data
-public class OrderDetailPayed {
+public class OrderDetailPaid {
     String id;
     String name;
     Integer price;
-    Date date;
+    Timestamp date;
+    String orderId;
 }

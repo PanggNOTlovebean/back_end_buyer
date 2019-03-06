@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -18,7 +19,7 @@ public class OrderPaidMapperTest {
     @Test
     public void save() {
         OrderPaid orderPaid=new OrderPaid();
-        orderPaid.setDate(new Date(System.currentTimeMillis()));
+        orderPaid.setDate(new Timestamp(System.currentTimeMillis()));
         orderPaid.setId("haha");
         orderPaid.setPrice(122);
         orderPaidMapper.save(orderPaid);

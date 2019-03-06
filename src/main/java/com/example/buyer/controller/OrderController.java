@@ -1,7 +1,7 @@
 package com.example.buyer.controller;
 
 import com.example.buyer.object.Order;
-import com.example.buyer.object.OrderDetailPayed;
+import com.example.buyer.object.OrderDetailPaid;
 import com.example.buyer.object.OrderPaid;
 import com.example.buyer.objectVO.BuyerIdVO;
 import com.example.buyer.objectVO.IdVO;
@@ -12,12 +12,11 @@ import com.example.buyer.service.OrderDetailPayedService;
 import com.example.buyer.service.OrderPaidService;
 import com.example.buyer.service.impl.OrderServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 @RestController
@@ -58,24 +57,26 @@ public class OrderController {
     @ResponseBody
     public Result clear(@Valid @RequestBody BuyerIdVO buyerId){
         try{
+            String order_id=String.valueOf(System.currentTimeMillis());
             List<Order> orderList;
             orderList=orderService.findByBuyerId(Integer.parseInt(buyerId.getBuyerId()));
             orderService.deleteByBuyerId(buyerId.getBuyerId());
             Integer allprice=0;
             for(int i=0;i<orderList.size();i++){
-                OrderDetailPayed orderDetailPayed=new OrderDetailPayed();
-                orderDetailPayed.setName(orderList.get(i).getName());
-                orderDetailPayed.setPrice(orderList.get(i).getPrice());
-                orderDetailPayed.setDate(new Date(System.currentTimeMillis()));
-                orderDetailPayed.setId(orderList.get(i).getId());
-                orderDetailPayedService.save(orderDetailPayed);
+                OrderDetailPaid orderDetailPaid =new OrderDetailPaid();
+                orderDetailPaid.setName(orderList.get(i).getName());
+                orderDetailPaid.setPrice(orderList.get(i).getPrice());
+                orderDetailPaid.setDate(new Timestamp(System.currentTimeMillis()));
+                orderDetailPaid.setId(orderList.get(i).getId());
+                orderDetailPaid.setOrderId(order_id);
+                orderDetailPayedService.save(orderDetailPaid);
                 allprice+=orderList.get(i).getPrice();
 
             }
             OrderPaid orderPaid=new OrderPaid();
             orderPaid.setPrice(allprice);
-            orderPaid.setId(String.valueOf(System.currentTimeMillis()));
-            orderPaid.setDate(new Date(System.currentTimeMillis()));
+            orderPaid.setId(order_id);
+            orderPaid.setDate(new Timestamp(System.currentTimeMillis()));
 
             orderPaidService.save(orderPaid);
         }catch (Exception e){

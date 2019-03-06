@@ -1,7 +1,7 @@
 package com.example.buyer.service;
 
-import com.example.buyer.object.OrderDetailPayed;
+import com.example.buyer.object.OrderDetailPaid;
 
 public interface OrderDetailPayedService {
-    void save(OrderDetailPayed orderDetailPayed);
+    void save(OrderDetailPaid orderDetailPaid);
 }
